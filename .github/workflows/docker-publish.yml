@@ -39,6 +39,10 @@ jobs:
           package_version=$(curl -s https://pkgs.alpinelinux.org/package/edge/main/x86_64/postfix | ./pup 'th:contains("Version") + td strong text{}')
           container_version=$(skopeo inspect docker://ghcr.io/marius/postfix-sendgrid | jq -r '.Labels."postfix-package-version"')
           echo "version=${package_version}" >> $GITHUB_OUTPUT
+          if [ -z "${package_version}"]; then
+            echo "No package version found"
+            exit 1
+          fi
           if [ "${container_version}" == "${package_version}" ]; then
             echo "new=false" >> $GITHUB_OUTPUT
           else
