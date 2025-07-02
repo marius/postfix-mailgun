@@ -1,13 +1,13 @@
-# Postfix to sendgrid mail relay
+# Postfix to Mailgun mail relay
 
-[![Docker](https://github.com/marius/postfix-sendgrid/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/marius/postfix-sendgrid/actions/workflows/docker-publish.yml)
+[![Docker](https://github.com/marius/postfix-mailgun/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/marius/postfix-mailgun/actions/workflows/docker-publish.yml)
 
-Very simple mail relay, just set the APIKEY environment variable and you should
+Very simple mail relay, just set the MAILGUN_LOGIN environment variable and you should
 be good to go.
 
 This Docker image automatically updates whenever there is an update to the
 underlying Alpine image and/or Postfix is updated in the Alpine package repository.
-(See https://github.com/marius/postfix-sendgrid/actions for how this is implemented)
+(See https://github.com/marius/postfix-mailgun/actions for how this is implemented)
 
 Heavily inspired by alterrebe/docker-mail-relay and simenduev/postfix-relay.
 
@@ -18,16 +18,16 @@ Heavily inspired by alterrebe/docker-mail-relay and simenduev/postfix-relay.
 ## Docker run
 
 ```
-docker run -d -e APIKEY=YOUR_KEY -p 25:25 ghcr.io/marius/postfix-sendgrid
+docker run -d -e MAILGUN_LOGIN=YOUR_LOGIN -p 25:25 ghcr.io/marius/postfix-mailgun
 ```
 
 ## Docker compose
 
 ```
   mailrelay:
-    image: ghcr.io/marius/postfix-sendgrid
+    image: ghcr.io/marius/postfix-mailgun
     environment:
-      APIKEY: YOUR_KEY
+      MAILGUN_LOGIN: YOUR_LOGIN
     ports:
       - "25:25"
 ```
@@ -36,18 +36,18 @@ Using a secret:
 
 ```
 secrets:
-  sendgrid_apikey:
-    file: /tank/docker/secrets/sendgrid_apikey
+  mailgun_login:
+    file: /tank/docker/secrets/mailgun_login
 
 services:
   mailrelay:
-    image: ghcr.io/marius/postfix-sendgrid
+    image: ghcr.io/marius/postfix-mailgun
     environment:
-      APIKEY_FILE: /run/secrets/sendgrid_apikey
+      MAILGUN_LOGIN_FILE: /run/secrets/mailgun_login
     ports:
       - "25:25"
     secrets:
-      - sendgrid_apikey
+      - mailgun_login
 ```
 
 ## Testing
@@ -55,7 +55,7 @@ services:
 On the host:
 
 ```
-ruby -r net/smtp -e 'Net::SMTP.start("localhost") { |s| s.send_mail "From: from@example.com\r\n\r\nHello via sendgrid", "from@example.com", "you@example.com" }'
+ruby -r net/smtp -e 'Net::SMTP.start("localhost") { |s| s.send_mail "From: from@example.com\r\n\r\nHello via mailgun", "from@example.com", "you@example.com" }'
 ```
 
 From another container:
@@ -63,7 +63,7 @@ From another container:
 ```
 host# docker run -it --rm --add-host host.docker.internal:host-gateway ubuntu
 container# apt update && apt install ruby -y
-container# ruby -r net/smtp -e 'Net::SMTP.start("host.docker.internal") { |s| s.send_mail "From: from@example.com\r\n\r\nHello via sendgrid", "from@example.com", "you@example.com" }'
+container# ruby -r net/smtp -e 'Net::SMTP.start("host.docker.internal") { |s| s.send_mail "From: from@example.com\r\n\r\nHello via mailgun", "from@example.com", "you@example.com" }'
 ```
 
 ## Sending email from other containers
